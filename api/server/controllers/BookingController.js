@@ -4,7 +4,7 @@ const bcrypt = require('bcrypt');
 const database = require('../src/models');
 const nodemailer = require("nodemailer");
 const jwt = require('jsonwebtoken');
-const multer = require('multer');
+
 
 const transporter = nodemailer.createTransport({
   service: 'gmail',
@@ -16,51 +16,12 @@ const transporter = nodemailer.createTransport({
 
 const util = new Util();
 
-//Configuration for Multer
-const multerStorage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        console.log("dest", file);
-        cb(null, "public");
-    },
-    filename: (req, file, cb) => {
-        console.log("filename", file);
-        const ext = file.mimetype.split("/")[1];
-        cb(null, `file-${file.fieldname}-${Date.now()}.${ext}`);
-    },
-});
-
-// Multer Filter
-const multerFilter = (req, file, cb) => {
-    console.log("multerFilter", file);
-    if (file.mimetype.split("/")[1] === "pdf") {
-    cb(null, true);
-    } else {
-    cb(new Error("Not a PDF File!!"), false);
-    }
-};
-
-// const upload = multer({
-//     storage: multerStorage,
-//     fileFilter: multerFilter,
-//     limits: {
-//         fileSize: 10000000 // 1000000 Bytes = 1 MB
-//     },
-// });
 
 
 const createBooking = async (req, res) => {
-    console.log("test", req.body);
+    console.log("test", req.file);
     try{
-        console.log("before", req.file);
-
-        const upload = multer({dest:'public/'}).single("msds_file");
-        upload.single("msds_file"), (req, res) => {
-            console.log("file upload", req.file)
-            return res.status(200).send({
-                status: req.file
-            });
-        };       
-        console.log("after");
+        console.log("before", req.body);
     }catch (error) {
         return res.status(403).send({
             status: error

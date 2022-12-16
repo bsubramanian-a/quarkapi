@@ -69,5 +69,6 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATE
     }
   });
+  
   return Company;
 };

@@ -13,7 +13,14 @@ app.use(cors({
     origin: '*'
 }));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+// app.use(bodyParser.urlencoded({ extended: true }));
+var urlencodedMiddleware = bodyParser.urlencoded({ extended: true });
+var isMultipart = /^multipart\//i;
+app.use(function (req, res, next) {
+    var type = req.get('Content-Type');
+    if (isMultipart.test(type)) return next();
+    return urlencodedMiddleware(req, res, next);
+});
 
 const port = process.env.PORT || 8000;
 
