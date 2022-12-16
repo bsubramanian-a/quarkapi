@@ -2,40 +2,40 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('Trucks', {
+    await queryInterface.createTable('Addresses', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      truck_no: {
-        type: Sequelize.STRING,
-        allowNull: false
-      },
-      transit_no: {
-        type: Sequelize.STRING,
-        allowNull: false
-      },
-      driver_name: {
-        type: Sequelize.STRING,
-        allowNull: false
-      },
-      phone_number: {
-        type: Sequelize.STRING,
-        allowNull: false
-      },
-      dob: {
+      address: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.STRING
       },
-      license_no: {
-        type: Sequelize.STRING,
-        allowNull: false
-      },
-      license_validity: {
+      user_id: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.INTEGER
+      },
+      latitude: {
+        allowNull: true,
+        type: Sequelize.REAL
+      },
+      longitude: {
+        allowNull: true,
+        type: Sequelize.REAL
+      },
+      city: {
+        allowNull: false,
+        type: Sequelize.STRING
+      },
+      country: {
+        allowNull: false,
+        type: Sequelize.STRING
+      },
+      zip: {
+        allowNull: false,
+        type: Sequelize.STRING
       },
       createdAt: {
         allowNull: false,
@@ -48,6 +48,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('Trucks');
+    await queryInterface.dropTable('Addresses');
   }
 };

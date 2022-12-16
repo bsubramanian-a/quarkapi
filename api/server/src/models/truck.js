@@ -8,6 +8,26 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
+    driver_name: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    phone_number: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    dob: {
+      allowNull: false,
+      type: DataTypes.DATE
+    },
+    license_no: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    license_validity: {
+      allowNull: false,
+      type: DataTypes.DATE
+    },
     createdAt: {
       allowNull: false,
       type: DataTypes.DATE
