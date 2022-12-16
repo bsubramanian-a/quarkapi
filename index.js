@@ -1,8 +1,6 @@
 const config = require('dotenv').config
 const express = require("express");
 const cors = require('cors');
-var multer = require('multer');
-var upload = multer();
 
 const bodyParser = require('body-parser')
 const userRoutes = require("./api/server/routes/UserRoutes");
@@ -16,10 +14,6 @@ app.use(cors({
 }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-
-// for parsing multipart/form-data
-app.use(upload.array()); 
-app.use(express.static('public'));
 
 const port = process.env.PORT || 8000;
 
