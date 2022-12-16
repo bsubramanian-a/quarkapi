@@ -1,5 +1,3 @@
-'use strict';
-/** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable('Documents', {
@@ -15,7 +13,7 @@ module.exports = {
       },
       user_id: {
         allowNull: false,
-        type: DataTypes.INTEGER
+        type: Sequelize.INTEGER
       },
       type: {
         type: Sequelize.ENUM,

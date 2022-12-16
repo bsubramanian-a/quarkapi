@@ -1,8 +1,13 @@
 const config = require('dotenv').config
 const express = require("express");
 const cors = require('cors');
-var bodyParser = require('body-parser')
+var multer = require('multer');
+var upload = multer();
+
+const bodyParser = require('body-parser')
 const userRoutes = require("./api/server/routes/UserRoutes");
+const companyRoutes = require("./api/server/routes/CompanyRoutes")
+const bookingRoutes = require("./api/server/routes/BookingRoutes")
 
 const app = express();
 
@@ -12,9 +17,15 @@ app.use(cors({
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+// for parsing multipart/form-data
+app.use(upload.array()); 
+app.use(express.static('public'));
+
 const port = process.env.PORT || 8000;
 
 app.use('/api/v1/users',userRoutes);
+app.use('/api/v1/companies', companyRoutes);
+app.use('/api/v1/bookings', bookingRoutes);
 
 // when a random route is inputed
 app.get('*', (req, res) => res.status(200).send({

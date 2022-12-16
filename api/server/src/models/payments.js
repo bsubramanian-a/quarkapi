@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-  const Truck = sequelize.define('Payments', {
+  const Payments = sequelize.define('Payments', {
     type: {
       type: DataTypes.ENUM,
       values: ['cash','paypal','card'],

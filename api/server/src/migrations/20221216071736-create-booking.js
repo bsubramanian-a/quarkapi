@@ -1,5 +1,3 @@
-'use strict';
-/** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable('Bookings', {
@@ -22,7 +20,7 @@ module.exports = {
         type: Sequelize.STRING
       },
       payment_id: {
-        allowNull: false,
+        allowNull: true,
         type: Sequelize.INTEGER
       },
       client_phone: {

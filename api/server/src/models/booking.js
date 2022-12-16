@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-  const Truck = sequelize.define('Booking', {
+  const Booking = sequelize.define('Booking', {
     booking_no: {
       allowNull: false,
       type: DataTypes.STRING
@@ -13,7 +13,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING
     },
     payment_id: {
-      allowNull: false,
+      allowNull: true,
       type: DataTypes.INTEGER
     },
     client_phone: {

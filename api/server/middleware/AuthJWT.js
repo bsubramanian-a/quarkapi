@@ -19,7 +19,7 @@ const verifyToken = async (req, res, next) => {
                 message: "Unauthorized!"
             });
         }
-        req.coachId = decoded.id;
+        req.userId = decoded.id;
         next();
     });
 };
