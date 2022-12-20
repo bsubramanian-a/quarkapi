@@ -76,10 +76,10 @@ const updateCompany = async (req, res) => {
                 const update_company = await database.Company.update(
                     data,
                     {where:{id: id}}
-                    );
-                    if (update_company) {
-                        return res.status(200).send("Company updated")
-                    }
+                );
+                if (update_company) {
+                    return res.status(200).send("Company updated")
+                }
             }else{
                 return res.status(403).send("No access");
             }

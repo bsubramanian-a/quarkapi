@@ -43,7 +43,7 @@ const createUser = async (req, res) => {
         from: 'crtvecode@gmail.com',
         to: email,
         subject: 'Login Credentials',
-        html: `Click the link to verify your account : ${url}/api/v1/users/verify-user?email=${email}&token=${otp}`
+        html: `<p>Click the link to verify your account : <a href="http://${url}/api/v1/users/verify-user/${email}/${otp}">${url}/api/v1/users/verify-user/${email}/${otp}</a></p>`
       };
 
       transporter.sendMail(mailOptions, function(error, info){
@@ -58,33 +58,75 @@ const createUser = async (req, res) => {
       });
     } else {
       return res.status(409).send({
-        status: "error" 
+        status: 409 
       });
     }
   } catch (error) {
     //console.log(error)
     return res.status(409).send({
-      status: "error" + error
+      status:409
+    });
+  }
+};
+
+const updateUser = async (req, res) => {
+  console.log("update user");
+  try {
+    let user_id = req.userId;
+    const { email, firstname, lastname } = req.body;
+    const otp = Math.floor(Math.random() * 10000000);
+    const data = {
+      email,
+      firstname,
+      lastname,
+      otp
+    }
+
+    const user = await database.User.findOne({where: {id:user_id}});
+    if (user) {
+       if(user.id == user_id){
+            const update_user = await database.User.update(
+                data,
+                {where:{id: user_id}}
+            );
+            if (update_user) {
+                return res.status(200).send("User updated")
+            }else{
+              return res.status(403).send("Please try again")
+            }
+        }else{
+            return res.status(403).send("No access");
+        }
+    } else {
+      return res.status(409).send({
+        status: 409 
+      });
+    }
+  } catch (error) {
+    //console.log(error)
+    return res.status(409).send({
+      status:409
     });
   }
 };
 
 const verifyUser = async (req, res) => {
   try{
-    const { email, token } = req.body;
+    const { email, token } = req.params;
+    console.log("email", email);
     const user = await database.User.findOne({where: {email}});
-    if(user.otp == token){
-      await database.User.update(
-        {otp: null, is_verified: 1},
-        {where:{id:user.id}}
-      );
-      return res.status(401).send({
-        status: "successfully verified" 
-      });
+    if(user.is_verified){
+      return res.redirect(process.env.WEB_URL);
     }else{
-      return res.status(401).send({
-        status: "verification failed, please try again" 
-      });
+      if(user.otp == token){
+        await database.User.update(
+          {otp: null, is_verified: 1},
+          {where:{id:user.id}}
+        );
+        return res.redirect(process.env.WEB_URL+'?verified=true');
+      }else{
+        return res.redirect(process.env.WEB_URL+'?verified=false');
+      }
     }
   }catch (error) {
     console.log(error)
@@ -93,6 +135,48 @@ const verifyUser = async (req, res) => {
     });
   }
 }
+
+const userAvatar = async (req, res) => {
+  const fs = require('fs');
+  let user_id = req.userId;
+  const user = await database.User.findOne({where: {id:user_id}});
+
+  if(user.avatar){
+    try {
+      fs.unlinkSync('public/images/'+user.avatar);
+      console.log('successfully deleted');
+    } catch (err) {
+      // handle the error
+      return res.status(400).send(err);
+    }
+  }
+  try{
+    if(req.file){
+      const upload = await database.User.update(
+        {avatar:req.file.filename},
+        {where:{id: user_id}}
+      );
+      
+      if(upload == 1){
+        return res.status(200).send({
+          status: "success",
+        });
+      }else{
+        return res.status(403).send({
+          status: "Please try again",
+        });
+      }
+    }else{
+      return res.status(403).send({
+        status: "Please select an image"
+      });
+    }
+  }catch (error) {
+    return res.status(403).send({
+        status: error
+    });
+  }
+};
 
 const loginUser = async (req, res) => {
   try {
@@ -146,4 +230,166 @@ const getAllUsers = async (req, res) => {
   }
 }
 
-module.exports = { createUser, getAllUsers, verifyUser, loginUser };
+const changePassword = async (req, res) => {
+  try {
+    let user_id = req.userId;
+    const user = await database.User.findOne({where: {id:user_id}});
+    const { currentpassword, newpassword } = req.body;
+
+    if (user) {
+      const isPasswordSame = await bcrypt.compareSync(currentpassword, user.password);      
+      if (isPasswordSame) {
+        const password_update = await database.User.update(
+          {password: await bcrypt.hashSync(newpassword, 10)},
+          {where:{id:user.id}}
+        );
+        if (password_update) {
+          const mailOptions = {
+            from: 'crtvecode@gmail.com',
+            to: user.email,
+            subject: 'Your New Password Updated Successfully',
+            text: `Your new Password : ${newpassword}`
+          };
+          transporter.sendMail(mailOptions, function(error, info){
+            if (error) {
+              console.log(error);
+            } else {
+              console.log('Email sent: ' + info.response);
+              return res.status(200).send({
+                status: "success" 
+              });
+            }
+          });
+        } else {
+          return res.status(401).send({
+            status: "New Password update error." 
+          }); 
+        }
+      } else {
+        return res.status(401).send({
+          status: "Old password is not correct." 
+        }); 
+      }
+    } else {
+      return res.status(401).send({
+        status: "Email does not exist." 
+      });
+    }
+  } catch (error) {
+    console.log(error)
+    return res.status(401).send({
+      status: "error" 
+    });
+  }
+}
+
+const forgetPassword = async (req, res) => {  
+  try {
+    const { email } = req.body;
+    const user = await database.User.findOne({where: {email}});
+
+    if (user) {
+      const otp_to_forget = Math.floor(100000 + Math.random() * 900000);
+        
+      const update_otp_forget = await database.User.update(
+        {otp: otp_to_forget},
+        {where:{id:user.id}}
+      );
+
+      console.log("web url", process.env.WEB_URL);
+
+      if (update_otp_forget) {
+        const mailOptions = {
+          from: 'crtvecode@gmail.com',
+          to: email,
+          subject: 'Forgot Password',
+          html: `<p>Click the link to change password : <a href="${process.env.WEB_URL}?email=${email}&token=${otp_to_forget}">${process.env.WEB_URL}?email=${email}&token=${otp_to_forget}</a></p>`
+        };
+  
+        transporter.sendMail(mailOptions, function(error, info){
+          if (error) {
+            console.log(error);
+          } else {
+            console.log('Email sent: ' + info.response);
+            return res.status(201).send({
+              status: "success" 
+            });
+            // do something useful
+          }
+        });
+      } else {
+        return res.status(401).send({
+          status: "OTP error" 
+        });
+      }
+    } else {
+      return res.status(401).send({
+        status: "Email does not exist." 
+      });
+    }
+  } catch (error) {
+    console.log(error)
+    return res.status(401).send({
+      status: "error" 
+    });
+  }
+}
+
+const resetPassword = async (req, res) => {  
+  try {
+    const { email, otp, currentpassword, newpassword } = req.body;
+    const user = await database.User.findOne({where: {email}});
+    if(user.otp == otp){
+      if (user) {
+        const isPasswordSame = await bcrypt.compareSync(currentpassword, user.password);      
+        if (isPasswordSame) {
+          const password_update = await database.User.update(
+            {password: await bcrypt.hashSync(newpassword, 10), otp: null},
+            {where:{id:user.id}}
+          );
+          if (password_update) {
+            const mailOptions = {
+              from: 'crtvecode@gmail.com',
+              to: user.email,
+              subject: 'Your New Password Updated Successfully',
+              text: `Your new Password : ${newpassword}`
+            };
+            transporter.sendMail(mailOptions, function(error, info){
+              if (error) {
+                console.log(error);
+              } else {
+                console.log('Email sent: ' + info.response);
+                return res.status(200).send({
+                  status: "success" 
+                });
+              }
+            });
+          } else {
+            return res.status(401).send({
+              status: "New Password update error." 
+            }); 
+          }
+        } else {
+          return res.status(401).send({
+            status: "Old password is not correct." 
+          }); 
+        }
+      } else {
+        return res.status(401).send({
+          status: "Email does not exist." 
+        });
+      }
+    }else{
+      return res.status(401).send({
+        status: "Token invalid, please try again!" 
+      });
+    }
+  } catch (error) {
+    console.log(error)
+    return res.status(401).send({
+      status: "error" 
+    });
+  }
+}
+
+module.exports = { createUser, getAllUsers, verifyUser, loginUser, userAvatar, updateUser, changePassword, forgetPassword, resetPassword };
