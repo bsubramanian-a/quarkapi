@@ -71,7 +71,7 @@ const createUser = async (req, res) => {
 
 const verifyUser = async (req, res) => {
   try{
-    const { email, token } = req.body;
+    const { email, token } = req.query;
     const user = await database.User.findOne({where: {email}});
     if(user.otp == token){
       await database.User.update(
