@@ -75,11 +75,13 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATE
     }
   });
-  Company.belongsToMany(User, {
-    as: {
-      singular: 'user',
-      plural: 'users'
-    }
-  })
+  Company.associate = function(models) {
+    Company.belongsTo(models.User, {
+      as: {
+        singular: 'user',
+        plural: 'users'
+      }
+    });
+  };
   return Company;
 };

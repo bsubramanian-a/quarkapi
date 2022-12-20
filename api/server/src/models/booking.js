@@ -150,17 +150,15 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.REAL
     },
   });
-  Booking.belongsToMany(User, {
-    as: {
-      singular: 'user',
-      plural: 'users'
-    }
-  })
-  Booking.hasOne(Payment, {
-    as: {
-      singular: 'payment',
-      plural: 'payments'
-    }
-  })
+  Booking.associate = function(models) {
+    Booking.belongsTo(models.User, {
+      as: {
+        singular: 'user',
+        plural: 'users'
+      }
+    });
+    Booking.hasOne(models.Payment)
+  };
+  
   return Booking;
 };

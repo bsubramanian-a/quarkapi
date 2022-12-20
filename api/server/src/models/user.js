@@ -1,3 +1,9 @@
+const Address = require('../models/address');
+const Booking = require('../models/booking');
+const Company = require('../models/company');
+const Document = require('../models/document');
+const Payment = require('../models/payment');
+
 module.exports = (sequelize, DataTypes) => {
   const User = sequelize.define('User', {    
     email: {
@@ -59,10 +65,37 @@ module.exports = (sequelize, DataTypes) => {
       plural: 'users',
     }
   });
-  User.hasMany(Address);
-  User.hasMany(Booking);
-  User.hasMany(Company);
-  User.hasMany(Document);
-  User.hasMany(Payment);
+  User.associate = function(models) {
+    User.hasMany(models.Address, {
+      as: {
+        singular: 'address',
+        plural: 'addresses'
+      }
+    });
+    User.hasMany(models.Booking, {
+      as: {
+        singular: 'booking',
+        plural: 'bookings'
+      }
+    });
+    User.hasMany(models.Company, {
+      as: {
+        singular: 'company',
+        plural: 'companies'
+      }
+    });
+    User.hasMany(models.Document, {
+      as: {
+        singular: 'document',
+        plural: 'documents'
+      }
+    });
+    User.hasMany(models.Payment, {
+      as: {
+        singular: 'payment',
+        plural: 'payments'
+      }
+    });
+  };
   return User;
 };

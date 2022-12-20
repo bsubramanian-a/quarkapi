@@ -133,13 +133,17 @@ const loginUser = async (req, res) => {
 
 const getAllUsers = async (req, res) => {
   try {
-    const allUsers = await UserService.getAllUsers();
-    if (allUsers.length > 0) {
-      util.setSuccess(200, 'Users retrieved', allUsers);
-    } else {
-      util.setSuccess(200, 'No user found');
-    }
-    return util.send(res);
+
+    const users = await database.User.findAll();
+    return res.status(401).send(users);
+
+    // const allUsers = await UserService.getAllUsers();
+    // if (allUsers.length > 0) {
+    //   util.setSuccess(200, 'Users retrieved', allUsers);
+    // } else {
+    //   util.setSuccess(200, 'No user found');
+    // }
+    //return util.send(res);
   } catch (error) {
     util.setError(400, error);
     return util.send(res);

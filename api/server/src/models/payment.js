@@ -1,3 +1,4 @@
+const User = require('../models/user');
 module.exports = (sequelize, DataTypes) => {
   const Payment = sequelize.define('Payment', {
     type: {
@@ -34,11 +35,13 @@ module.exports = (sequelize, DataTypes) => {
       plural: 'payments',
     }
   });
-  Payment.belongsToMany(User, {
-    as: {
-      singular: 'user',
-      plural: 'users'
-    }
-  })
+  Payment.associate = function(models) {
+    Payment.belongsTo(models.User, {
+      as: {
+        singular: 'user',
+        plural: 'users'
+      }
+    });
+  };
   return Payment;
 };

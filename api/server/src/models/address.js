@@ -43,11 +43,13 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATE
     }
   });
-  Address.belongsToMany(User, {
-    as: {
-      singular: 'user',
-      plural: 'users'
-    }
-  });
+  Address.associate = function(models) {
+    Address.belongsTo(models.User, {
+      as: {
+        singular: 'user',
+        plural: 'users'
+      }
+    });
+  };
   return Address;
 };

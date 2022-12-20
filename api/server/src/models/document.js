@@ -1,3 +1,4 @@
+const User = require('../models/user');
 module.exports = (sequelize, DataTypes) => {
   const Document = sequelize.define('Document', {
     document: {
@@ -28,11 +29,13 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATE
     }
   });
-  Document.belongsToMany(User, {
-    as: {
-      singular: 'user',
-      plural: 'users'
-    }
-  })
+  Document.associate = function(models) {
+    Document.belongsTo(models.User, {
+      as: {
+        singular: 'user',
+        plural: 'users'
+      }
+    });
+  };
   return Document;
 };
