@@ -1,12 +1,18 @@
 module.exports = (sequelize, DataTypes) => {
-  const Documents = sequelize.define('Documents', {
+  const Document = sequelize.define('Document', {
     document: {
       allowNull: false,
       type: DataTypes.STRING
     },
     user_id: {
       allowNull: false,
-      type: DataTypes.INTEGER
+      type: DataTypes.INTEGER,
+      references: {
+        model: {
+          tableName: 'User'
+        },
+        key: 'id'
+      }
     },
     type: {
       type: DataTypes.ENUM,
@@ -22,5 +28,11 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATE
     }
   });
-  return Documents;
+  Document.belongsToMany(User, {
+    as: {
+      singular: 'user',
+      plural: 'users'
+    }
+  })
+  return Document;
 };

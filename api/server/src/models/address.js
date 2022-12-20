@@ -6,7 +6,13 @@ module.exports = (sequelize, DataTypes) => {
     },
     user_id: {
       allowNull: false,
-      type: DataTypes.INTEGER
+      type: DataTypes.INTEGER,
+      references: {
+        model: {
+          tableName: 'User'
+        },
+        key: 'id'
+      }
     },
     latitude: {
       allowNull: true,
@@ -35,6 +41,12 @@ module.exports = (sequelize, DataTypes) => {
     updatedAt: {
       allowNull: false,
       type: DataTypes.DATE
+    }
+  });
+  Address.belongsToMany(User, {
+    as: {
+      singular: 'user',
+      plural: 'users'
     }
   });
   return Address;

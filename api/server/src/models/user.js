@@ -53,6 +53,16 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       type: DataTypes.DATE
     }
+  }, {
+    name: {
+      singular: 'user',
+      plural: 'users',
+    }
   });
+  User.hasMany(Address);
+  User.hasMany(Booking);
+  User.hasMany(Company);
+  User.hasMany(Document);
+  User.hasMany(Payment);
   return User;
 };
