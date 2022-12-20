@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { getAllUsers, loginUser, createUser, verifyUser, userAvatar, updateUser, changePassword, forgetPassword, resetPassword} = require('../controllers/UserController');
+const { getAllUsers, loginUser, createUser, verifyUser, userAvatar, updateUser, changePassword, forgetPassword, resetPassword, verifyEmail } = require('../controllers/UserController');
 const { checkCoachAlreadyExist } = require('../middleware/UserAuth');
 const { verifyToken } = require('../middleware/AuthJWT');
 const multer = require('multer');
@@ -42,6 +42,7 @@ router.post('/reset-password',resetPassword);
 router.post('/update-user',[verifyToken],updateUser);
 router.post('/change-password',[verifyToken],changePassword);
 router.post('/login-user',loginUser);
+router.post('/verify-email',verifyEmail);
 router.get('/login-user',loginUser);
 router.get('/verify-user/:email/:token',verifyUser);
 router.post('/user-avatar',[verifyToken, upload.single("user_image")],userAvatar)
