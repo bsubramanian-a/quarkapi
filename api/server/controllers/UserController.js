@@ -43,7 +43,7 @@ const createUser = async (req, res) => {
         from: 'crtvecode@gmail.com',
         to: email,
         subject: 'Login Credentials',
-        html: `Click the link to verify your account : ${url}/api/v1/users/verify-user?email=${email}&token=${otp}`
+        html: `Click the link to verify your account : <a>${url}/api/v1/users/verify-user?email=${email}&token=${otp}</a>`
       };
 
       transporter.sendMail(mailOptions, function(error, info){

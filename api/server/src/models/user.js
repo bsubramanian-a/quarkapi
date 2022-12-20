@@ -1,9 +1,3 @@
-const Address = require('../models/address');
-const Booking = require('../models/booking');
-const Company = require('../models/company');
-const Document = require('../models/document');
-const Payment = require('../models/payment');
-
 module.exports = (sequelize, DataTypes) => {
   const User = sequelize.define('User', {    
     email: {
