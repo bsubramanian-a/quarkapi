@@ -6,7 +6,13 @@ module.exports = (sequelize, DataTypes) => {
     },
     user_id: {
       allowNull: false,
-      type: DataTypes.INTEGER
+      type: DataTypes.INTEGER,
+      references: {
+        model: {
+          tableName: 'Users'
+        },
+        key: 'id'
+      }
     },
     client_name: {
       allowNull: false,
@@ -14,7 +20,13 @@ module.exports = (sequelize, DataTypes) => {
     },
     payment_id: {
       allowNull: true,
-      type: DataTypes.INTEGER
+      type: DataTypes.INTEGER,
+      references: {
+        model: {
+          tableName: 'Payments'
+        },
+        key: 'id'
+      }
     },
     client_phone: {
       allowNull: false,
@@ -138,5 +150,15 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.REAL
     },
   });
+  Booking.associate = function(models) {
+    Booking.belongsTo(models.User, {
+      as: {
+        singular: 'user',
+        plural: 'users'
+      }
+    });
+    Booking.hasOne(models.Payment)
+  };
+  
   return Booking;
 };

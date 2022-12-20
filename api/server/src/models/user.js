@@ -53,6 +53,43 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       type: DataTypes.DATE
     }
+  }, {
+    name: {
+      singular: 'user',
+      plural: 'users',
+    }
   });
+  User.associate = function(models) {
+    User.hasMany(models.Address, {
+      as: {
+        singular: 'address',
+        plural: 'addresses'
+      }
+    });
+    User.hasMany(models.Booking, {
+      as: {
+        singular: 'booking',
+        plural: 'bookings'
+      }
+    });
+    User.hasMany(models.Company, {
+      as: {
+        singular: 'company',
+        plural: 'companies'
+      }
+    });
+    User.hasMany(models.Document, {
+      as: {
+        singular: 'document',
+        plural: 'documents'
+      }
+    });
+    User.hasMany(models.Payment, {
+      as: {
+        singular: 'payment',
+        plural: 'payments'
+      }
+    });
+  };
   return User;
 };

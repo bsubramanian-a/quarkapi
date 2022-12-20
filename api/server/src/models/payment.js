@@ -1,5 +1,6 @@
+const User = require('../models/user');
 module.exports = (sequelize, DataTypes) => {
-  const Payments = sequelize.define('Payments', {
+  const Payment = sequelize.define('Payment', {
     type: {
       type: DataTypes.ENUM,
       values: ['cash','paypal','card'],
@@ -7,7 +8,13 @@ module.exports = (sequelize, DataTypes) => {
     },
     user_id: {
       allowNull: false,
-      type: DataTypes.INTEGER
+      type: DataTypes.INTEGER,
+      references: {
+        model: {
+          tableName: 'Users'
+        },
+        key: 'id'
+      }
     },
     status: {
       type: DataTypes.ENUM,
@@ -22,6 +29,19 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       type: DataTypes.DATE
     }
+  }, {
+    name: {
+      singular: 'payment',
+      plural: 'payments',
+    }
   });
-  return Payments;
+  Payment.associate = function(models) {
+    Payment.belongsTo(models.User, {
+      as: {
+        singular: 'user',
+        plural: 'users'
+      }
+    });
+  };
+  return Payment;
 };

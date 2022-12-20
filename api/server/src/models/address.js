@@ -6,7 +6,13 @@ module.exports = (sequelize, DataTypes) => {
     },
     user_id: {
       allowNull: false,
-      type: DataTypes.INTEGER
+      type: DataTypes.INTEGER,
+      references: {
+        model: {
+          tableName: 'Users'
+        },
+        key: 'id'
+      }
     },
     latitude: {
       allowNull: true,
@@ -37,5 +43,13 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATE
     }
   });
+  Address.associate = function(models) {
+    Address.belongsTo(models.User, {
+      as: {
+        singular: 'user',
+        plural: 'users'
+      }
+    });
+  };
   return Address;
 };

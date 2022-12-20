@@ -2,7 +2,7 @@
 
 module.exports = {
   up: function up(queryInterface, Sequelize) {
-    return queryInterface.createTable('Users', {
+    return queryInterface.createTable('User', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -32,7 +32,7 @@ module.exports = {
     });
   },
   down: function down(queryInterface) {
-    return queryInterface.dropTable('Users');
+    return queryInterface.dropTable('User');
   }
 };
 //# sourceMappingURL=20221126095247-create-user.js.map
