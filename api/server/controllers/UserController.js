@@ -5,6 +5,13 @@ const database = require('../src/models');
 const nodemailer = require("nodemailer");
 const jwt = require('jsonwebtoken');
 const e = require("express");
+const twilio = require('twilio');
+
+const twillio_accountSid = process.env.TWILLIO_SID;
+const twillio_authToken = process.env.TWILLIO_TOKEN;
+const twillio_phone = process.env.TWILLIO_PHONE;
+
+const client = new twilio(twillio_accountSid, twillio_authToken);
 
 const transporter = nodemailer.createTransport({
   service: 'gmail',
@@ -194,22 +201,29 @@ const loginUser = async (req, res) => {
     const user = await database.User.findOne({where: {email}});
 
     if (user) {
-      const isPasswordSame = await bcrypt.compareSync(password, user.password);      
-      if (isPasswordSame) {        
-        let token = jwt.sign({ id: user.id }, process.env.SECRET_KEY, {
-          expiresIn: 1 * 24 * 60 * 60 * 1000,
-        });
-        res.cookie("jwt", token, { maxAge: 1 * 24 * 60 * 60, httpOnly: true });
-
-        return res.status(201).send({
-          status: 200,
-          user,
-          token 
-        });
-      } else {
+      if(user.is_verified){
+        const isPasswordSame = await bcrypt.compareSync(password, user.password);      
+        if (isPasswordSame) {        
+          let token = jwt.sign({ id: user.id }, process.env.SECRET_KEY, {
+            expiresIn: 1 * 24 * 60 * 60 * 1000,
+          });
+          res.cookie("jwt", token, { maxAge: 1 * 24 * 60 * 60, httpOnly: true });
+  
+          return res.status(201).send({
+            status: 200,
+            user,
+            token 
+          });
+        } else {
+          return res.status(401).send({
+            status:409,
+            message: "Credentials are not correct" 
+          });
+        }
+      }else{
         return res.status(401).send({
           status:409,
-          message: "Credentials are not correct" 
+          message: "Please verify your email to proceed" 
         });
       }
     } else {
@@ -455,4 +469,179 @@ const verifyEmail = async (req, res) => {
   }
 }
 
-module.exports = { createUser, getAllUsers, verifyUser, loginUser, userAvatar, updateUser, changePassword, forgetPassword, resetPassword, verifyEmail };
+const sendOtpLogin = async(phone, otp) => {
+  return new Promise((resolve, reject) => {
+    client.messages
+    .create({
+      body: `Please use this otp ${otp} to login.`,
+      to: phone,
+      from: twillio_phone,
+    })
+    .then((message) => {
+      resolve(true);
+    }).catch(err => {
+      console.log("error twillio", err.message);
+      resolve(err.message);
+    });
+  })
+}
+
+const resendLoginOtp = async (req, res) => {
+  try {
+    const { phone } = req.body;
+    const user = await database.User.findOne({where: {phone_number:phone}});
+    const otp = Math.floor(1000 + Math.random() * 9000);
+    if(user){
+      const update_otp = await database.User.update(
+        {otp: otp},
+        {where:{id:user.id}}
+      );
+      
+      if(update_otp){
+        const sentMsg = await sendOtpLogin(phone, otp);
+        if(sentMsg == true){
+          return res.status(200).send({
+            status: 200,
+            message: "An sms with otp has been sent to your number." 
+          });
+        }else{
+          return res.status(401).send({
+            status: 401,
+            message: sentMsg 
+          });
+        }
+      }else {
+        return res.status(401).send({
+          status: 401,
+          message: "OTP error" 
+        });
+      }
+    }else{
+      return res.status(401).send({
+        status: 401,
+        message: "Please create an account to proceed"
+      });
+    }
+  } catch (error) {
+    console.log(error)
+    return res.status(401).send({
+      status: "error" 
+    });
+  }
+}
+
+const loginWithOTP = async (req, res) => {
+  try {
+    const { phone, user_type } = req.body;
+    const user = await database.User.findOne({where: {phone_number:phone}});
+    const otp = Math.floor(1000 + Math.random() * 9000);
+    if(user){
+      const update_otp = await database.User.update(
+        {otp: otp},
+        {where:{id:user.id}}
+      );
+      
+      if(update_otp){
+        const sentMsg = await sendOtpLogin(phone, otp);
+        if(sentMsg == true){
+          return res.status(200).send({
+            status: "An sms with otp has been sent to your number." 
+          });
+        }else{
+          return res.status(401).send({
+            status: sentMsg 
+          });
+        }
+      }else {
+        return res.status(401).send({
+          status: "OTP error" 
+        });
+      }
+    }else{
+      const data = {
+        user_type: user_type,
+        phone_number: phone
+      }
+  
+      const newUser = await database.User.create(data);
+      console.log("newUser",newUser);
+      if (newUser) {
+        const update_otp = await database.User.update(
+          {otp: otp},
+          {where:{id:newUser.id}}
+        );
+        
+        if(update_otp){
+          const sentMsg = await sendOtpLogin(phone, otp);
+          if(sentMsg == true){
+            return res.status(200).send({
+              message: "An sms with otp has been sent to your number.",
+              status: 200, 
+            });
+          }else{
+            return res.status(401).send({
+              message: sentMsg,
+              status: 401, 
+            });
+          }
+        }else {
+          return res.status(401).send({
+            message: "OTP error",
+            status: 401,
+          });
+        }
+      }else{
+        return res.status(401).send({
+          message: "something went wrong, please try again",
+          status: 401
+        });
+      }
+    }
+  } catch (error) {
+    console.log(error)
+    return res.status(401).send({
+      status: "error" 
+    });
+  }
+}
+
+const verifyLoginOTP = async (req, res) => {
+  try {
+    const { phone, otp } = req.body;
+    const user = await database.User.findOne({where: {phone_number:phone}});
+
+    if(user){
+      if(user.otp == otp){
+        let token = jwt.sign({ id: user.id }, process.env.SECRET_KEY, {
+          expiresIn: 1 * 24 * 60 * 60 * 1000,
+        });
+        res.cookie("jwt", token, { maxAge: 1 * 24 * 60 * 60, httpOnly: true });
+
+        return res.status(201).send({
+          message: 'Successfully verified',
+          user,
+          token,
+          status: 200
+        });
+      }else {
+        return res.status(401).send({
+          message: "OTP not valid",
+          status: 401
+        });
+      }
+    }else{
+      return res.status(401).send({
+        message: "No user found, please register",
+        status: 401
+      });
+    }
+  } catch (error) {
+    console.log(error)
+    return res.status(401).send({
+      message: error,
+      status: 401 
+    });
+  }
+}
+
+module.exports = { createUser, getAllUsers, verifyUser, loginUser, userAvatar, updateUser, changePassword, forgetPassword, resetPassword, verifyEmail, loginWithOTP, verifyLoginOTP, resendLoginOtp };

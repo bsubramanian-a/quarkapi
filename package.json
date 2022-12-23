@@ -30,7 +30,8 @@
     "path": "^0.12.7",
     "pg": "^8.8.0",
     "pg-hstore": "^2.3.4",
-    "sequelize": "^6.25.8"
+    "sequelize": "^6.25.8",
+    "twilio": "^3.84.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.19.3",

@@ -9,12 +9,12 @@ module.exports = {
       },
       email: {
         type: Sequelize.STRING,
-        allowNull: false,
+        allowNull: true,
         unique: true
       },
       password: {
         type: Sequelize.STRING,
-        allowNull: false,
+        allowNull: true,
       },
       otp: {
         allowNull: true,
@@ -38,7 +38,7 @@ module.exports = {
       },
       user_type: {
         type: Sequelize.ENUM,
-        values: ['driver','buyer','receiver','transportation_company'],
+        values: ['driver','supplier','receiver','transporter'],
         defaultValue:'driver',
       },
       phone_number: {
