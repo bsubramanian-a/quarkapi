@@ -140,9 +140,9 @@ const verifyUser = async (req, res) => {
           {otp: null, is_verified: 1},
           {where:{id:user.id}}
         );
-        return res.redirect(process.env.WEB_URL+'?verified=true');
+        return res.redirect(process.env.WEB_URL+'/verify-user?verified=true');
       }else{
-        return res.redirect(process.env.WEB_URL+'?verified=false');
+        return res.redirect(process.env.WEB_URL+'/verify-user?verified=false');
       }
     }
   }catch (error) {
