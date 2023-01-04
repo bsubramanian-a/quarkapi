@@ -195,6 +195,58 @@ const userAvatar = async (req, res) => {
   }
 };
 
+const loginTransporter = async (req, res) => {
+  try {
+    const { email, password, type } = req.body;
+    const user = await database.User.findOne({where: {email}});
+
+    if (user) {
+      if(user.is_verified){
+        if(user.user_type == 'transporter'){
+          const isPasswordSame = await bcrypt.compareSync(password, user.password);      
+          if (isPasswordSame) {        
+            let token = jwt.sign({ id: user.id }, process.env.SECRET_KEY, {
+              expiresIn: 1 * 24 * 60 * 60 * 1000,
+            });
+            res.cookie("jwt", token, { maxAge: 1 * 24 * 60 * 60, httpOnly: true });
+    
+            return res.status(201).send({
+              status: 200,
+              user,
+              token 
+            });
+          } else {
+            return res.status(401).send({
+              status:409,
+              message: "Credentials are not correct" 
+            });
+          }
+        }else{
+          return res.status(401).send({
+            status:409,
+            message: `You don't have transporter account!` 
+          });
+        }
+      }else{
+        return res.status(401).send({
+          status:409,
+          message: "Please verify your email to proceed" 
+        });
+      }
+    } else {
+      return res.status(401).send({
+        status:409,
+        message: "Email does not exist." 
+      });
+    }
+  } catch (error) {
+    console.log(error)
+    return res.status(401).send({
+      status: "error" 
+    });
+  }
+}
+
 const loginUser = async (req, res) => {
   try {
     const { email, password, type } = req.body;
@@ -657,4 +709,4 @@ const verifyLoginOTP = async (req, res) => {
   }
 }
 
-module.exports = { createUser, getAllUsers, verifyUser, loginUser, userAvatar, updateUser, changePassword, forgetPassword, resetPassword, verifyEmail, loginWithOTP, verifyLoginOTP, resendLoginOtp };
+module.exports = { createUser, getAllUsers, verifyUser, loginUser, userAvatar, updateUser, changePassword, forgetPassword, resetPassword, verifyEmail, loginWithOTP, verifyLoginOTP, resendLoginOtp, loginTransporter };
