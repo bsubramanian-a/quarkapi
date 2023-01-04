@@ -86,6 +86,69 @@ const createUser = async (req, res) => {
   }
 };
 
+const createTransporter = async (req, res) => {
+  const url = req.get('host');
+
+  try {
+    const { email, password, type, firstname, lastname } = req.body;
+    const otp = Math.floor(Math.random() * 10000000);
+    const data = {
+      email,
+      password: bcrypt.hashSync(password, 10),
+      user_type: 'transporter',
+      firstname,
+      lastname,
+      otp
+    }
+    const user = await database.User.findOne({where: {email:email}});
+    if(user){
+      return res.status(200).send({
+        status: 409,
+        message: "Account already exist, please login to proceed" 
+      });
+    }else{
+      const newUser = await database.User.create(data);
+      if (newUser) {
+        let token = jwt.sign({id: newUser.id}, process.env.SECRET_KEY, {
+          expiresIn: 1 * 24 * 60 * 60 * 1000,
+        });
+        res.cookie("jwt", token, { maxAge: 1 * 24 * 60 * 60, httpOnly: true });
+        console.log("newUser", JSON.stringify(newUser, null, 2));
+        console.log(token);
+  
+        const mailOptions = {
+          from: 'crtvecode@gmail.com',
+          to: email,
+          subject: 'Login Credentials',
+          html: `<p>Click the link to verify your account : <a href="http://${url}/api/v1/users/verify-user/${email}/${otp}">${url}/api/v1/users/verify-user/${email}/${otp}</a></p>`
+        };
+  
+        transporter.sendMail(mailOptions, function(error, info){
+          if (error) {
+            console.log(error);
+          } else {
+            console.log('Email sent: ' + info.response);
+            return res.status(200).send({
+              status: 200,
+              message: "Registration successfull, please check your email to verify!" 
+            });
+          }
+        });
+      } else {
+        return res.status(200).send({
+          status: 409,
+          message: "Account already exist, please login to proceed" 
+        });
+      }
+    }
+  } catch (error) {
+    //console.log(error)
+    return res.status(409).send({
+      status:409
+    });
+  }
+};
+
 const updateUser = async (req, res) => {
   console.log("update user");
   try {
@@ -709,4 +772,4 @@ const verifyLoginOTP = async (req, res) => {
   }
 }
 
-module.exports = { createUser, getAllUsers, verifyUser, loginUser, userAvatar, updateUser, changePassword, forgetPassword, resetPassword, verifyEmail, loginWithOTP, verifyLoginOTP, resendLoginOtp, loginTransporter };
+module.exports = { createUser, getAllUsers, verifyUser, loginUser, userAvatar, updateUser, changePassword, forgetPassword, resetPassword, verifyEmail, loginWithOTP, verifyLoginOTP, resendLoginOtp, loginTransporter, createTransporter };

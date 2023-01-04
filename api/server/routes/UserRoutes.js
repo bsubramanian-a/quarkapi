@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { getAllUsers, loginUser, createUser, verifyUser, userAvatar, updateUser, changePassword, forgetPassword, resetPassword, verifyEmail, loginWithOTP, verifyLoginOTP, resendLoginOtp, loginTransporter } = require('../controllers/UserController');
+const { getAllUsers, loginUser, createUser, verifyUser, userAvatar, updateUser, changePassword, forgetPassword, resetPassword, verifyEmail, loginWithOTP, verifyLoginOTP, resendLoginOtp, loginTransporter, createTransporter } = require('../controllers/UserController');
 const { checkCoachAlreadyExist } = require('../middleware/UserAuth');
 const { verifyToken } = require('../middleware/AuthJWT');
 const multer = require('multer');
@@ -46,6 +46,7 @@ router.post('/verify-email',verifyEmail);
 router.get('/login-user',loginUser);
 router.post('/login-with-otp',loginWithOTP);
 router.post('/login-transporter',loginTransporter);
+router.post('/create-transporter',createTransporter);
 router.post('/verify-login-otp',verifyLoginOTP);
 router.post('/resend-login-otp',resendLoginOtp);
 router.get('/verify-user/:email/:token',verifyUser);
