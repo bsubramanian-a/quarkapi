@@ -75,13 +75,6 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATE
     }
   });
-  Company.associate = function(models) {
-    Company.belongsTo(models.User, {
-      as: {
-        singular: 'user',
-        plural: 'users'
-      }
-    });
-  };
+
   return Company;
 };

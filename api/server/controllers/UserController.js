@@ -259,6 +259,7 @@ const userAvatar = async (req, res) => {
 };
 
 const loginTransporter = async (req, res) => {
+  console.log("test")
   try {
     const { email, password, type } = req.body;
     const user = await database.User.findOne({where: {email}});

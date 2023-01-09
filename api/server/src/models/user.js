@@ -76,7 +76,8 @@ module.exports = (sequelize, DataTypes) => {
       as: {
         singular: 'company',
         plural: 'companies'
-      }
+      },
+      foreignKey: "user_id",  
     });
     User.hasMany(models.Document, {
       as: {

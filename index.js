@@ -6,6 +6,7 @@ const bodyParser = require('body-parser')
 const userRoutes = require("./api/server/routes/UserRoutes");
 const companyRoutes = require("./api/server/routes/CompanyRoutes")
 const bookingRoutes = require("./api/server/routes/BookingRoutes")
+const TruckRoutes = require("./api/server/routes/TruckRoutes")
 
 const app = express();
 
@@ -24,9 +25,14 @@ app.use(function (req, res, next) {
 
 const port = process.env.PORT || 8000;
 
+app.use(express.urlencoded({
+    extended: true
+}));
+
 app.use('/api/v1/users',userRoutes);
 app.use('/api/v1/companies', companyRoutes);
 app.use('/api/v1/bookings', bookingRoutes);
+app.use('/api/v1/trucks', TruckRoutes);
 
 // when a random route is inputed
 app.get('*', (req, res) => res.status(200).send({

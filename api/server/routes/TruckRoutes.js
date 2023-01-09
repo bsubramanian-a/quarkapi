@@ -1,16 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const { createCompany, updateCompany, getCompany } = require('../controllers/CompanyController');
+const { createTruck, updateCompany, getCompany } = require('../controllers/TruckController');
 const { verifyToken } = require('../middleware/AuthJWT');
 
-
-// router.get('/', UserController.getAllUsers);
-// router.post('/', UserController.addUser);
-// router.get('/:id', UserController.getAUser);
-// router.put('/:id', UserController.updatedUser);
-// router.delete('/:id', UserController.deleteUser);
-
-router.post('/create-company',[verifyToken],createCompany)
+router.post('/create-truck',[verifyToken],createTruck)
 router.post('/update-company',[verifyToken],updateCompany)
 router.get('/get-company',[verifyToken],getCompany)
 // router.post('/coach-login',coachLogin);

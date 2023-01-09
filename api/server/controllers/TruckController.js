@@ -15,23 +15,23 @@ const transporter = nodemailer.createTransport({
 
 const util = new Util();
 
-const createCompany = async (req, res) => {
+const createTruck = async (req, res) => {
+    console.log("req", req.body);
     let user_id = req.userId;
-    // console.log("req data", req.userId)
 
     if(user_id){
         try {
-            const { name, address, reg_no, trucks_owned, trucks_partnership, phone_number, md, md_phone, op, op_phone, overseas_agent, overseas_agent_phone, latitude, longitude } = req.body.data;
+            const { truck_no, transit_no, driver_name, phone_number, dob, license_no, license_validity } = req.body.data;
             const data = {
-                name, user_id, address, reg_no, trucks_owned, trucks_partnership, phone_number, latitude, longitude, md, md_phone, op, op_phone, overseas_agent, overseas_agent_phone
+                truck_no, transit_no, driver_name, phone_number, dob, license_no, license_validity
             }
 
             // console.log("create data", data);
     
-            const newCompany = await database.Company.create(data);
-            if (newCompany) {
+            const newTruck = await database.Truck.create(data);
+            if (newTruck) {
                 return res.status(200).send({
-                    message: "company created successfully",
+                    message: "Truck information added successfully",
                     status: 200,
                 });
             } else {
@@ -85,25 +85,25 @@ const updateCompany = async (req, res) => {
     } catch (error) {
       console.log(error)
     }
-  };
+};
 
-  const getCompany = async (req, res) => {
-    try {
-        let user_id = req.userId;
+const getCompany = async (req, res) => {
+try {
+    let user_id = req.userId;
 
-        const company = await database.Company.findOne({where: {user_id}});
+    const company = await database.Company.findOne({where: {user_id}});
 
-        if (company) {
-            return res.status(200).send({
-                data: company,
-                status: 200,
-            });
-        } else {
-            return res.status(401).send("User does not have a company");
-        }
-    } catch (error) {
-      console.log(error)
+    if (company) {
+        return res.status(200).send({
+            data: company,
+            status: 200,
+        });
+    } else {
+        return res.status(401).send("User does not have a company");
     }
-  }
+} catch (error) {
+    console.log(error)
+}
+}
 
-module.exports = { createCompany, updateCompany, getCompany };
+module.exports = { createTruck, updateCompany, getCompany };
