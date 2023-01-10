@@ -83,7 +83,8 @@ module.exports = (sequelize, DataTypes) => {
       as: {
         singular: 'document',
         plural: 'documents'
-      }
+      },
+      foreignKey: "user_id",
     });
     User.hasMany(models.Payment, {
       as: {

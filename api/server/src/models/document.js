@@ -5,19 +5,17 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       type: DataTypes.STRING
     },
-    user_id: {
-      allowNull: false,
+    truck_id: {
+      allowNull: true,
       type: DataTypes.INTEGER,
-      references: {
-        model: {
-          tableName: 'Users'
-        },
-        key: 'id'
-      }
+    },
+    user_id: {
+      allowNull: true,
+      type: DataTypes.INTEGER,
     },
     type: {
       type: DataTypes.ENUM,
-      values: ['commercial_invoice','packaging_list','cmr','export_declaration','bijak_file','others'],
+      values: ['commercial_invoice','packaging_list','cmr','export_declaration','bijak_file','others','truck'],
       defaultValue:'commercial_invoice',
     },
     createdAt: {
@@ -29,13 +27,5 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATE
     }
   });
-  Document.associate = function(models) {
-    Document.belongsTo(models.User, {
-      as: {
-        singular: 'user',
-        plural: 'users'
-      }
-    });
-  };
   return Document;
 };

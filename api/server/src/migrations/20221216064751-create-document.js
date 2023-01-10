@@ -11,19 +11,17 @@ module.exports = {
         allowNull: false,
         type: Sequelize.STRING
       },
-      user_id: {
-        allowNull: false,
+      truck_id: {
+        allowNull: true,
         type: Sequelize.INTEGER,
-        references: {
-          model: {
-            tableName: 'Users'
-          },
-          key: 'id'
-        },
+      },
+      user_id: {
+        allowNull: true,
+        type: Sequelize.INTEGER,
       },
       type: {
         type: Sequelize.ENUM,
-        values: ['commercial_invoice','packaging_list','cmr','export_declaration','bijak_file','others'],
+        values: ['commercial_invoice','packaging_list','cmr','export_declaration','bijak_file','others', 'truck'],
         defaultValue:'commercial_invoice',
       },
       createdAt: {

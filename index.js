@@ -9,7 +9,9 @@ const bookingRoutes = require("./api/server/routes/BookingRoutes")
 const TruckRoutes = require("./api/server/routes/TruckRoutes")
 
 const app = express();
-
+// var publicDir = require('path').join(__dirname,'/public'); 
+// app.use(express.static(publicDir)); 
+app.use("/public", express.static(require('path').join(__dirname, 'public')));
 app.use(cors({
     origin: '*'
 }));

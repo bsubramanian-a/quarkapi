@@ -4,6 +4,7 @@ const bcrypt = require('bcrypt');
 const database = require('../src/models');
 const nodemailer = require("nodemailer");
 const jwt = require('jsonwebtoken');
+const twilio = require('twilio');
 
 const transporter = nodemailer.createTransport({
   service: 'gmail',
@@ -13,23 +14,52 @@ const transporter = nodemailer.createTransport({
   }
 });
 
+const twillio_accountSid = process.env.TWILLIO_SID;
+const twillio_authToken = process.env.TWILLIO_TOKEN;
+const twillio_phone = process.env.TWILLIO_PHONE;
+
+const client = new twilio(twillio_accountSid, twillio_authToken);
+
 const util = new Util();
 
 const createTruck = async (req, res) => {
-    console.log("req", req.body);
+    // console.log("req1", req.files, req.body);
     let user_id = req.userId;
 
     if(user_id){
+        const user = await database.User.findOne({where: {id:user_id}});
+        console.log("user", user, user_id);
         try {
-            const { truck_no, transit_no, driver_name, phone_number, dob, license_no, license_validity } = req.body.data;
+            const { truck_no, transit_no, driver_name, phone_number, dob, license_no, license_validity, id_no } = req.body;
             const data = {
-                truck_no, transit_no, driver_name, phone_number, dob, license_no, license_validity
+                truck_no, transit_no, driver_name, phone_number, dob, license_no, license_validity, id_no, user_id
             }
-
-            // console.log("create data", data);
     
             const newTruck = await database.Truck.create(data);
+          
             if (newTruck) {
+                if(req?.files?.length > 0){
+                    let truck_id = newTruck.dataValues.id;
+                    req?.files.forEach(async (file) => {
+                        const data = {document: file.filename, truck_id, type: 'truck'}
+                        const newDocument = await database.Document.create(data); 
+                        // console.log("newdoc", newDocument);
+                    });
+                }
+
+                client.messages
+                    .create({
+                        body: `${user.firstname} ${user.lastname} has invited you to register, please download the app using the following link and register. https://www.google.com`,
+                        to: "+"+phone_number,
+                        from: twillio_phone,
+                    })
+                        .then((message) => {
+                        resolve(true);
+                    }).catch(err => {
+                        console.log("error twillio", err.message);
+                        resolve(err.message);
+                    });
+
                 return res.status(200).send({
                     message: "Truck information added successfully",
                     status: 200,
@@ -87,23 +117,31 @@ const updateCompany = async (req, res) => {
     }
 };
 
-const getCompany = async (req, res) => {
-try {
-    let user_id = req.userId;
+const getTrucks = async (req, res) => {
+    try {
+        let user_id = req.userId;
+        const url = 'http://' + req.get('host') + '/public/files/';
+        database.Truck.findAll({where: {user_id}}).then(async trucks => {
+            // console.log('trucks', trucks);
+            const promises = trucks.map(async truck => {
+                const documents = await database.Document.findAll({where: {truck_id: truck?.dataValues?.id}});
+                truck.dataValues.documents = documents;
+                truck.dataValues.fileUrl = url;
+    
+                return truck;
+            });
 
-    const company = await database.Company.findOne({where: {user_id}});
+            await Promise.all(promises)
+            // console.log("promises..............", promises);
 
-    if (company) {
-        return res.status(200).send({
-            data: company,
-            status: 200,
+            return res.status(200).send({
+                data: trucks,
+                status: 200,
+            });
         });
-    } else {
-        return res.status(401).send("User does not have a company");
+    } catch (error) {
+        console.log(error)
     }
-} catch (error) {
-    console.log(error)
-}
 }
 
-module.exports = { createTruck, updateCompany, getCompany };
+module.exports = { createTruck, updateCompany, getTrucks };
